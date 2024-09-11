@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.responses import JSONResponse
@@ -39,16 +40,36 @@ async def all_list():
 
 #Task
 @taskRouter.post('/task', response_model=CreateTask, name="Создание задачи")
-async def create_module(object_: CreateTask):  #type: ignore
-    # module = await Module.get(id=object_.module_id)
-    # level = await Level.get(id=object_.level_id)
-    task_obj = await Task.create(title=object_.title,
-                                 level_id=object_.level_id)
+async def create_module(object_: CreateTask, #type: ignore
+                        answer_1,
+                        answer_2,
+                        answer_3,):
     
+    answer = {"Ответ 1":answer_1,
+              "Ответ 2":answer_2,
+              "Ответ 3":answer_3,}
+    
+    answers_json = json.dumps(answer)
+    
+    task_obj = await Task.create(level_id=object_.level_id,
+                                 question=object_.question,
+                                 answer = answers_json,
+                                 key = object_.key
+                                 )
     return JSONResponse(content={"id":task_obj.id,
-                                 "title":task_obj.title})
-                                #  "module":module.title,
-                                #  "level":level.title})
+                                 "question":task_obj.question,
+                                 "answer":task_obj.answer,
+                                 "correct_answer":task_obj.key})
+
+
+
+@taskRouter.post('/task/{task_id}/check')
+async def check_task(task_id: int, answer: int):
+    task = await Task.get(id=task_id)
+    if task.key == answer:
+        return {"result": "Correct"}
+    else:
+        return {"result": "Incorrect"}
 
 
 @taskRouter.get('/task/all', response_model=List[GetTask], description="---", name="Получение всех Задач")
