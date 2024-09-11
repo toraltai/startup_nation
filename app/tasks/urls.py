@@ -2,6 +2,7 @@ import json
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from .models import *
 
 taskRouter = APIRouter()
@@ -38,16 +39,21 @@ async def all_list():
     return await GetLevel.from_queryset(Level.all())
 
 
+class TaskInput(BaseModel):
+    answer_1: str
+    answer_2: str
+    answer_3: str
+
 #Task
 @taskRouter.post('/task', response_model=CreateTask, name="Создание задачи")
 async def create_module(object_: CreateTask, #type: ignore
-                        answer_1,
-                        answer_2,
-                        answer_3,):
+                        input_data: TaskInput,):
     
-    answer = {"Ответ 1":answer_1,
-              "Ответ 2":answer_2,
-              "Ответ 3":answer_3,}
+    answer = {
+        "Ответ 1": input_data.answer_1,
+        "Ответ 2": input_data.answer_2,
+        "Ответ 3": input_data.answer_3,
+    }
     
     answers_json = json.dumps(answer)
     

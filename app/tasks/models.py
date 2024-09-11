@@ -43,7 +43,7 @@ class Task(Model):
 
 Tortoise.init_models(["app.tasks.models"], "models")
 GetTask = pydantic_model_creator(Task, name="Task",)
-CreateTask = pydantic_model_creator(Task, name="TaskIn", exclude_readonly=True)
+CreateTask = pydantic_model_creator(Task, name="TaskIn", exclude_readonly=True, exclude=['answer'])
 
 
 
